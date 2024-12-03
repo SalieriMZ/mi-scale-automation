@@ -33,11 +33,14 @@ async def connect_and_measure():
         logger.info("disconnected callback")
         disconnected_event.set()
 
-    device = await find_miscale_device()
+    device = None
+    while not device:
+        device = await find_miscale_device()
+        if not device:
+            logger.info("no device found, retrying in 5 seconds...")
+            await asyncio.sleep(5)
+
     logger.info(f"found device: {device.name}")
-    if not device:
-        logger.info("no device found")
-        return
 
     client = BleakClient(device, disconnected_callback=disconnected_callback)
 
